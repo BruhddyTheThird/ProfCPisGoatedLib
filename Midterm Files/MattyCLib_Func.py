@@ -2,6 +2,7 @@
 from sys import argv
 import warnings
 def InteriorProduct(Array1, Array2):
+    #this is the dot product
     if len(Array1) != len(Array2):
         raise ValueError('The arrays do not have the same length!')
     productExpr = 0
