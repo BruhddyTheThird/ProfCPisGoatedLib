@@ -14,7 +14,7 @@ A = 4.7E-3 #m^2
 r = 0.0213 #m
 S = (2/3)*rho*r**3*pi #kg
 m = 4.575E-2 #kg
-N = 500 #number of time steps.
+N = 350 #number of time steps.
 k=N #time variable used later
 #set up constants
 
@@ -24,12 +24,12 @@ vel_vec_aray[0] = np.array([77*cos(radians(10)),0,77*sin(radians(10))])
 pos_vec_aray = np.zeros((N,3))
 pos_vec_aray[0]=np.array([0,0,0.03])
 omega_vec_aray = np.zeros((N,3))
-omega_vec_aray[0]=np.array([0,-240*pi,0])
+omega_vec_aray[0]=np.array([0,-330,0])
 #set up initial vectors
 
 delta_t = 1/50
-t = np.arange(0,10,delta_t)
-#make 500 time points, from 1-7.
+t = np.arange(0,7,delta_t)
+#make 350 time points, from 1-7.
 
 def Magnitude(vec):
     sq_vec = np.zeros(len(vec))
