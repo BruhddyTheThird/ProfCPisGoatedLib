@@ -7,26 +7,29 @@ import pandas as pd
 plt.style.use('seaborn-v0_8-colorblind')
 #use specific style for matplot
 
-g = 9.81
-C_d = 0.25
-rho = 1.225
-A = 6.4E-3
-S = 0.1
-m = 4.575E-2
+g = 9.81 #m/s^2
+C_d = 0.15 #dimensionless
+rho = 1.235 #kg/m^3
+A = 4.7E-3 #m^2
+r = 0.0213 #m
+S = (2/3)*rho*r**3*pi #kg
+m = 4.575E-2 #kg
+N = 500 #number of time steps.
+k=N #time variable used later
 #set up constants
 
-vel_vec_aray = np.zeros((699,3))
-vel_vec_aray[0] = np.array([77*cos(radians(8.75)),0,77*sin(radians(8.75))])
+vel_vec_aray = np.zeros((N,3))
+vel_vec_aray[0] = np.array([77*cos(radians(10)),0,77*sin(radians(10))])
 # use radians() function on degress.
-pos_vec_aray = np.zeros((699,3))
-pos_vec_aray[0]=np.array([0,0,0])
-omega_vec_aray = np.zeros((699,3))
-omega_vec_aray[0]=np.array([0,-130,0])
+pos_vec_aray = np.zeros((N,3))
+pos_vec_aray[0]=np.array([0,0,0.03])
+omega_vec_aray = np.zeros((N,3))
+omega_vec_aray[0]=np.array([0,-240*pi,0])
 #set up initial vectors
 
-delta_t = 1/100
-t = np.arange(0,7,delta_t)
-#make 700 time points, from 1-7.
+delta_t = 1/50
+t = np.arange(0,10,delta_t)
+#make 500 time points, from 1-7.
 
 def Magnitude(vec):
     sq_vec = np.zeros(len(vec))
@@ -72,12 +75,12 @@ def Dot_v_z(vel_vec,omega_vec=[0,0,0],component=False):
         # 2-tuple, make sure future calls can handle that
 #Define our acceleration in z as a function of velocity
 
-acc_vec_aray = np.zeros((699,3))
+acc_vec_aray = np.zeros((N,3))
 acc_vec_aray[0]=np.array([Dot_v_x(vel_vec_aray[0],omega_vec_aray[0]),
                Dot_v_y(vel_vec_aray[0],omega_vec_aray[0]),
                Dot_v_z(vel_vec_aray[0],omega_vec_aray[0])])
 
-for i in range(1,699):
+for i in range(1,N):
     vel_x = vel_vec_aray[i-1][0] + acc_vec_aray[i-1][0]*delta_t
     vel_y = vel_vec_aray[i-1][1] + acc_vec_aray[i-1][1]*delta_t
     vel_z = vel_vec_aray[i-1][2] + acc_vec_aray[i-1][2]*delta_t
@@ -87,9 +90,12 @@ for i in range(1,699):
     pos_y = pos_vec_aray[i-1][1] + vel_vec_aray[i][1]*delta_t
     pos_z = pos_vec_aray[i-1][2] + vel_vec_aray[i][2]*delta_t
     pos_vec_aray[i] = np.array([pos_x,pos_y,pos_z])
+    if pos_vec_aray[i][2] <= 1E-3:
+        k = i
+        break #this simulates hitting the ground and no more force being applied.
     #Euler-Cromer position update
-    omega_y = omega_vec_aray[i-i][1]*0.964
-    omega_z = omega_vec_aray[i-1][2]*0.964
+    omega_y = omega_vec_aray[i-i][1]#*0.964
+    omega_z = omega_vec_aray[i-1][2]#*0.964
     omega_vec_aray[i] = np.array([0,omega_y,omega_z])
     #exponential decay of angular velocity
     acc_x = Dot_v_x(vel_vec_aray[i],omega_vec_aray[i])
@@ -97,6 +103,7 @@ for i in range(1,699):
     acc_z = Dot_v_z(vel_vec_aray[i],omega_vec_aray[i])
     acc_vec_aray[i] = np.array([acc_x,acc_y,acc_z])
     #Euler acceleration update
-
-print(vel_vec_aray[0:50])
-#This should print normal values and 100% SHOULD NOT diverge to NaN.
+if k != N:
+    for i in range(k+1,N):
+        pos_vec_aray[i] = np.array([pos_vec_aray[i-1][0],pos_vec_aray[i-1][1],0])
+        #this updates the position array with the final x and y positions, while keeping z zero.
