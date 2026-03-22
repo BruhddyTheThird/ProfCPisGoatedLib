@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 def SHO_acc(x,v):
     return -x
 
-def RK2O_gen(x_0,v_0,t_0,tf,dt,acc_func:function,fargs=tuple|None):
+def RK2O_gen(x_0,v_0,t_0,tf,dt,acc_func=SHO_acc,fargs=tuple|None):
     """
     Integrates two first-order ODEs that are the reduction of a single second-order ODE.
     Takes initial values of the position and velocity (x_0,v_0), 
@@ -37,3 +37,22 @@ def RK2O_gen(x_0,v_0,t_0,tf,dt,acc_func:function,fargs=tuple|None):
         v[i] = v_prev + 0.5 * (k_1v+k_2v)
     return t,x,v
 
+def Generate_Phase_Space_gen(x_lim,v_lim,grid_size,acc_func=SHO_acc,fargs=tuple|None):
+    """
+    Generates a phase space mesh and vectors for a given acceleration function.
+    Takes the limits of the limits of the variables (x_lim, v_lim),
+    a grid size (grid_size),
+    and an acceleration function plus its arguments.
+    Returns the grid 'X,V' and the changes in variable values at each point, 'dX, dV'.
+    """
+    X_space = np.linspace(x_lim[0],x_lim[1], grid_size)
+    V_space = np.linspace(v_lim[0], v_lim[1], grid_size)
+# intitalize our axes
+    X,V = np.meshgrid(X_space,V_space)
+# combine axes
+    try:
+        dX,dV = V, acc_func(X,V,*fargs)
+    except:
+        dX,dV = V, acc_func(X,V)
+# calculate change in axes values
+    return X,V,dX,dV
