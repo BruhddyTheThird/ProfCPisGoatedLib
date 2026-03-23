@@ -57,3 +57,6 @@ def Gen_Phase_Space(x_lim,v_lim,grid_size,acc_func=SHO_acc,fargs=tuple|None):
         dX,dV = V, acc_func(X,V)
     # calculate change in axes values
     return X,V,dX,dV
+
+def func(a):
+    return (a,1)
