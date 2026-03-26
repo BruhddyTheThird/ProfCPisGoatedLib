@@ -1,5 +1,3 @@
-
-
 def SHO_acc(x,v):
     return -x
 
