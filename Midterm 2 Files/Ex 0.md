@@ -31,6 +31,8 @@ $%after talking with danny, I came to the idea that for the force decomposition,
 ### 0c.)
  Provide an **updated** artifact from your project. This could be a plot, a code snippet, a data set, or a figure. Explain what this artifact is and how it fits into your project. (at least 150 words)
 ***
+For this section, one of the things we will, for absolute certain, need for an analysis of a dimpled ball is a parametric equation for the surface of the dimpled ball, as we will be integrating over its surface for our analysis. The function and representation of the ball (for verification) will be represented here. I include the code used to generate the code here, and will include the resources used for reference.
+
 ### 0d.)
  Update your project timeline and milestones. How will you adjust your timeline to account for the work you have done and the work you have left to do? (at least 150 words)
 ***
