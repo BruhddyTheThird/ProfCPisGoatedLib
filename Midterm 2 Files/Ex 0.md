@@ -31,8 +31,28 @@ $%after talking with danny, I came to the idea that for the force decomposition,
 ### 0c.)
  Provide an **updated** artifact from your project. This could be a plot, a code snippet, a data set, or a figure. Explain what this artifact is and how it fits into your project. (at least 150 words)
 ***
-For this section, one of the things we will, for absolute certain, need for an analysis of a dimpled ball is a parametric equation for the surface of the dimpled ball, as we will be integrating over its surface for our analysis. The function and representation of the ball (for verification) will be represented here. I include the code used to generate the code here, and will include the resources used for reference.
+For this section, one of the things we will, for absolute certain, need for an analysis of a dimpled ball is a parametric equation for the surface of the dimpled ball, as we will be integrating over its surface for our analysis. The function and representation of the ball (for verification) will be represented here. I include the code and visualization here, and will include the resources used for reference.
+![alt text](image1.png)
+This image is of a polar function that generates a dimpled circle. This represents, quite clearly, the surface of our golf ball we would use in the wind tunnel analysis to find $S(v)$. It isn't exact to the specifications of our ball, as it was created in desmos, but marks some real progress towards our goal of modeling the trajectory here in full detail. On the image, one can see that there are dimples, of course, with sinusoidal walls, and the radius of the ball, outside of the dimples. Importantly, as in real-life golf balls, the ratio of dimpled circumference to undimpled circumference is greater than 50\%, somewhere around 70\%.
 
 ### 0d.)
  Update your project timeline and milestones. How will you adjust your timeline to account for the work you have done and the work you have left to do? (at least 150 words)
 ***
+Our project timeline (including milestones) with the current progress we have made regarding research and proof-of-concept goes as follows:
+
+#### Milestone 1 - Wind tunnel simulator
+ - Create an 2-D agent-based particle model that simulates collisions and momentum transfer between particles.
+ - Adapt this to the situation of a wind tunnel, and allow for starting the simulation with some tunable initial particle settings and placements.
+ - Add functionality to keep track of changes in momentum following collisions of groups of like particles.
+ - Design a function that can "integrate" these changes over the timespan of the simulation.
+#### Milestone 2 - Running $S(v)$ simulations
+ - Create a tunable, parametric function that creates an accurate depiction of standard golf balls in 2-D (This is the part that we have some good work on from the artifact).
+ - Devise a method to transform the parametric function of the ball into initial particles (probably a mesh or something) in the simulator.
+ - Create functionality for the ball to rotate in the simulator (this might be a little tricky)
+ - Optimize the ball and simulator so that running it over $n<100$ steps takes less than an hour.
+ - Run the simulator, grab our forces, decompose them, and get $S$ values in a table.
+#### Milestone 3 - Modeling Trajectory
+ - Interpolate $S$ values into $S(v)$ function
+ - Get EoM, and integrate
+ - Tune for a few different initial parameters, based on the parameters of the real-life trajectories that we find.
+ - Visualize and compare to a few different real-life examples, as well as to our exercise 1 for midterm 1 example.
