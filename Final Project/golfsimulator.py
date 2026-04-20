@@ -21,7 +21,13 @@ xlim = (0,700)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
+v_max = 30 #WE CHANGE THIS, maybe as a parameter to run this file with.
+
 #initialize some global variables.
+def vel_scaling(y,v_max):
+    f = v_max / ( (100 - 210)**2 )
+    return -f * (y-210)**2 + v_max #gives a scaling velocity curve to the spawned air.
+
 
 class RigidAirSimulation(object):
     """
@@ -181,7 +187,7 @@ class RigidAirSimulation(object):
         x = 10
         y = random.randint(101,600-281)
         body.position = x, y
-        body.velocity = v_mult*(-(1/169.8)*(y-((319+101)/2))**2+70), 0
+        body.velocity = v_mult*vel_scaling(y,v_max), 0
         shape = pymunk.Circle(body, radius, (0, 0))
         shape.elasticity = 1
         shape.friction = 0
