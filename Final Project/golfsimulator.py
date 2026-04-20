@@ -94,22 +94,23 @@ class RigidAirSimulation(object):
         :return: None
         """
         static_body = self._space.static_body
-        static_lines = [
-            pymunk.Segment(static_body, (xlim[0], 322), (xlim[1], 322), 0.0),
-            pymunk.Segment(static_body, (xlim[0], 98), (xlim[1], 98), 0.0)
+        static_boxes = [
+            pymunk.Poly(self._space.static_body, [(xlim[0],320),(xlim[1],320),(xlim[1],322),(xlim[0],322)]),
+            pymunk.Poly(self._space.static_body, [(xlim[0],100),(xlim[1],100),(xlim[1],98),(xlim[0],98)])
         ]
-        for line in static_lines:
-            line.elasticity = 0.01
-            line.friction = 0.01
-        self._space.add(*static_lines)
+        
+        for box in static_boxes:
+            box.elasticity = 1
+            box.friction = 0.01
+        self._space.add(*static_boxes)
     
     def _add_golf_ball(self) -> None:
         """SON D:"""
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
         body.position = 300,210
-        body.angular_velocity = 103*np.pi
+        body.angular_velocity = 2#41*np.pi #about 240pi rad/s just showing the rotation
         shape = pymunk.Circle(body,50)
-        shape.elasticity = 0.95
+        shape.elasticity = 1
         shape.friction = 0.25
         shape.collision_type = 2 #golf ball...
         self._space.add(body,shape)
