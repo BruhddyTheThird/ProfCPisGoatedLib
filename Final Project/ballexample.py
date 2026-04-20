@@ -11,6 +11,7 @@ import random
 
 # Library imports
 import pygame
+import numpy as np
 
 # pymunk imports
 import pymunk
@@ -26,30 +27,31 @@ class BouncyBalls(object):
     def __init__(self) -> None:
         # Space
         self._space = pymunk.Space()
-        self._space.gravity = (0.0, 900.0)
+        self._space.gravity = (0, 0)
 
         # Physics
         # Time step
-        self._dt = 1.0 / 60.0
+        self._dt = (0.5) / 60.0
         # Number of physics steps per screen frame
-        self._physics_steps_per_frame = 1
+        self._physics_steps_per_frame = 10
 
         # pygame
         pygame.init()
-        self._screen = pygame.display.set_mode((600, 600))
+        self._screen = pygame.display.set_mode((300, 600))
         self._clock = pygame.time.Clock()
 
         self._draw_options = pymunk.pygame_util.DrawOptions(self._screen)
 
         # Static barrier walls (lines) that the balls bounce off of
         self._add_static_scenery()
+        self._add_golf_ball()
 
         # Balls that exist in the world
         self._balls: list[pymunk.Circle] = []
 
         # Execution control and time until the next ball spawns
         self._running = True
-        self._ticks_to_next_ball = 10
+        self._ticks_to_next_ball = 1
 
     def run(self) -> None:
         """
@@ -68,8 +70,9 @@ class BouncyBalls(object):
             self._draw_objects()
             pygame.display.flip()
             # Delay fixed time between frames
-            self._clock.tick(50)
-            pygame.display.set_caption("fps: " + str(self._clock.get_fps()))
+            self._clock.tick(60)
+            fps = self._clock.get_fps()
+            pygame.display.set_caption("fps: " + f"{fps:.2f}")
 
     def _add_static_scenery(self) -> None:
         """
@@ -78,13 +81,23 @@ class BouncyBalls(object):
         """
         static_body = self._space.static_body
         static_lines = [
-            pymunk.Segment(static_body, (111.0, 600 - 280), (407.0, 600 - 246), 0.0),
-            pymunk.Segment(static_body, (407.0, 600 - 246), (407.0, 600 - 343), 0.0),
+            pymunk.Segment(static_body, (0, 320), (300, 320), 0.0),
+            pymunk.Segment(static_body, (0, 100), (300, 100), 0.0)
         ]
         for line in static_lines:
-            line.elasticity = 0.95
-            line.friction = 0.9
+            line.elasticity = 0.01
+            line.friction = 0.01
         self._space.add(*static_lines)
+    
+    def _add_golf_ball(self) -> None:
+        son = "SON D:"
+        body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
+        body.position = 150,210
+        body.angular_velocity = 2*np.pi
+        shape = pymunk.Circle(body,50)
+        shape.elasticity = 0.95
+        shape.friction = 0.25
+        self._space.add(body,shape)
 
     def _process_events(self) -> None:
         """
@@ -106,10 +119,13 @@ class BouncyBalls(object):
         """
         self._ticks_to_next_ball -= 1
         if self._ticks_to_next_ball <= 0:
-            self._create_ball()
-            self._ticks_to_next_ball = 100
-        # Remove balls that fall below 100 vertically
-        balls_to_remove = [ball for ball in self._balls if ball.body.position.y > 500]
+            i = 1
+            while i < 40:
+                self._create_ball()
+                i += 1
+            self._ticks_to_next_ball = 1
+        # Remove balls that move farther than 1000 horizontally
+        balls_to_remove = [ball for ball in self._balls if (ball.body.position.x > 300 or ball.body.position.x < 10)]
         for ball in balls_to_remove:
             self._space.remove(ball, ball.body)
             self._balls.remove(ball)
@@ -119,15 +135,17 @@ class BouncyBalls(object):
         Create a ball.
         :return:
         """
-        mass = 10
-        radius = 25
+        mass = 5.3E-9  # in kg
+        radius = 1 #.42E-4  in meters
         inertia = pymunk.moment_for_circle(mass, 0, radius, (0, 0))
-        body = pymunk.Body(mass, inertia)
-        x = random.randint(115, 350)
-        body.position = x, 200
+        body = pymunk.Body(mass, float(inertia)) #testing 0 moment
+        x = 10
+        y = random.randint(101,600-281)
+        body.position = x, y
+        body.velocity = -(1/169.8)*(y-((319+101)/2))**2+70, 0
         shape = pymunk.Circle(body, radius, (0, 0))
-        shape.elasticity = 0.95
-        shape.friction = 0.9
+        shape.elasticity = 1
+        shape.friction = 0
         self._space.add(body, shape)
         self._balls.append(shape)
 
