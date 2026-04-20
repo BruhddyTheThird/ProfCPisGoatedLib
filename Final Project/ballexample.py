@@ -120,6 +120,7 @@ class RigidAirSimulation(object):
         """
         global saving
         global save_start_frame
+        global save_time
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._running = False
@@ -130,12 +131,15 @@ class RigidAirSimulation(object):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                 saving = True #flag for saving frames
                 save_start_frame = frame
-                print(f"Saving next {int(1/(2*self._dt)):.0f} frames") 
+                save_time = time.time()
+                print(f"Saving next {int(1/(2*self._dt)):.0f} frames.") 
             if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
                 saving = False #update flag
                 force = -1 * 2 * np.array(total_impulse) / (2.34 * 1000)
-                print("Save complete")
+                curr_time = time.time() - save_time
+                print(f"Save complete in {curr_time:.2f} seconds.")
                 print(f"Force is {force[0]:.2e}N in x-direction.\nForce is {force[1]:.2e}N in y-direction.")
+
         
     def _update_balls(self) -> None:
         """
