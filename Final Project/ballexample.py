@@ -33,7 +33,7 @@ class RigidAirSimulation(object):
         # Space
         self._space = pymunk.Space()
 
-        self._space.use_spatial_hash(1.5,56000)
+        self._space.use_spatial_hash(2.1,200000)
         # Physics
         # Time step
         self._dt = 1 / 120
@@ -51,8 +51,8 @@ class RigidAirSimulation(object):
         self._clock = pygame.time.Clock()
 
         self._draw_options = pymunk.pygame_util.DrawOptions(self._screen)
-        self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_SHAPES
-
+        # use this for actually performing simulations for data
+        self._draw_options.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS
         # Static barrier walls (lines) that the balls bounce off of
         self._add_static_scenery()
         # Static/rotating golf ball that the balls hit.
@@ -80,7 +80,7 @@ class RigidAirSimulation(object):
             self._update_balls()
             self._clear_screen()
             self._draw_objects()
-            #print(f"Number of balls: {len(self._balls)}")
+            print(f"Number of balls: {len(self._balls)}")
             pygame.display.flip()
             # Delay fixed time between frames
             self._clock.tick(60)
@@ -106,7 +106,7 @@ class RigidAirSimulation(object):
         """SON D:"""
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
         body.position = 300,210
-        body.angular_velocity = 2*np.pi
+        body.angular_velocity = 103*np.pi
         shape = pymunk.Circle(body,50)
         shape.elasticity = 0.95
         shape.friction = 0.25
@@ -133,6 +133,10 @@ class RigidAirSimulation(object):
                 save_start_frame = frame
                 save_time = time.time()
                 print(f"Saving next {int(1/(2*self._dt)):.0f} frames.") 
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+                self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_SHAPES
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+                self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_CONSTRAINTS
             if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
                 saving = False #update flag
                 force = -1 * 2 * np.array(total_impulse) / (2.34 * 1000)
@@ -149,7 +153,7 @@ class RigidAirSimulation(object):
         self._ticks_to_next_ball -= 1
         if self._ticks_to_next_ball <= 0:
             i = 1
-            while i < 120: #create 120 air "molecules" per tick
+            while i < 220: #create 120 air "molecules" per tick
                 self._create_ball()
                 i += 1
             self._ticks_to_next_ball = 1
