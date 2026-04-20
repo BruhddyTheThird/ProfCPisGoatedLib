@@ -31,9 +31,9 @@ class RigidAirSimulation(object):
 
         # Physics
         # Time step
-        self._dt = (0.5) / 60.0
+        self._dt = (0.01) / 60.0
         # Number of physics steps per screen frame
-        self._physics_steps_per_frame = 4
+        self._physics_steps_per_frame = 1
 
         #Important collision handling
         self._space.on_collision(1,2,begin=self._ball_show,post_solve=self._ball_math)
@@ -120,7 +120,7 @@ class RigidAirSimulation(object):
                 print("Saving next 10000ms") 
             elif event.type == done_saving:
                 saving = False #update flag
-                force = np.array(total_impulse) / 10000
+                force = -1 * np.array(total_impulse) / 10000
                 print("Save complete")
                 print(f"Force is {force[0]:.2e} m/s? in x-direction.\nForce is {force[1]:.2e} m/s? in y-direction.")
                 pygame.time.set_timer(done_saving, 0) # is this necessary? ideally the timer should stop automatically, since set_timer was called with loops=0.
@@ -147,14 +147,14 @@ class RigidAirSimulation(object):
         Create a ball.
         :return:
         """
-        mass = 5.3E-9  # in kg
-        radius = 1 # in mm
+        mass = 6.87E-8  # in kg
+        radius = 1 # in mm ( 2.34301780694 units/mm. )
         inertia = pymunk.moment_for_circle(mass, 0, radius, (0, 0))
         body = pymunk.Body(mass, inertia) #testing 0 moment
         x = 10
         y = random.randint(101,600-281)
         body.position = x, y
-        body.velocity = -(1/169.8)*(y-((319+101)/2))**2+70, 0
+        body.velocity = 298.76*(-(1/169.8)*(y-((319+101)/2))**2+70), 0
         shape = pymunk.Circle(body, radius, (0, 0))
         shape.elasticity = 1
         shape.friction = 0
@@ -205,3 +205,6 @@ start_sim_time = time.perf_counter()
 
 if __name__ == "__main__":
     main()
+pygame.display.quit()
+pygame.quit()
+sys.exit()
