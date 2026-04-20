@@ -14,10 +14,14 @@ import numpy as np
 # pymunk imports
 import pymunk
 import pymunk.pygame_util
+from sympy import fps
 
+xlim = (0,700)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
+#initialize some global variables.
+
 class RigidAirSimulation(object):
     """
     This class implements a simulation of air on a rotating or static ball.
@@ -29,18 +33,21 @@ class RigidAirSimulation(object):
         # Space
         self._space = pymunk.Space()
 
+        self._space.use_spatial_hash(1.5,56000)
         # Physics
         # Time step
-        self._dt = (0.01) / 60.0
+        self._dt = 1 / 120
         # Number of physics steps per screen frame
-        self._physics_steps_per_frame = 1
+        self._physics_steps_per_frame = 4
+        global v_mult
+        v_mult = 1/(self._physics_steps_per_frame/(self._dt) * (1/1000) * (1/2.34))
 
         #Important collision handling
         self._space.on_collision(1,2,begin=self._ball_show,post_solve=self._ball_math)
 
         # pygame
         pygame.init()
-        self._screen = pygame.display.set_mode((300, 600))
+        self._screen = pygame.display.set_mode((xlim[1], 400))
         self._clock = pygame.time.Clock()
 
         self._draw_options = pymunk.pygame_util.DrawOptions(self._screen)
@@ -62,6 +69,8 @@ class RigidAirSimulation(object):
         :return: None
         """
         # Main loop
+        global frame
+        frame = 0
         while self._running:
             # Progress time forward
             for x in range(self._physics_steps_per_frame):
@@ -71,10 +80,12 @@ class RigidAirSimulation(object):
             self._update_balls()
             self._clear_screen()
             self._draw_objects()
+            #print(f"Number of balls: {len(self._balls)}")
             pygame.display.flip()
             # Delay fixed time between frames
             self._clock.tick(60)
             fps = self._clock.get_fps()
+            frame += 1
             pygame.display.set_caption("fps: " + f"{fps:.2f}")
     def _add_static_scenery(self) -> None:
         """
@@ -83,8 +94,8 @@ class RigidAirSimulation(object):
         """
         static_body = self._space.static_body
         static_lines = [
-            pymunk.Segment(static_body, (0, 320), (300, 320), 0.0),
-            pymunk.Segment(static_body, (0, 100), (300, 100), 0.0)
+            pymunk.Segment(static_body, (xlim[0], 322), (xlim[1], 322), 0.0),
+            pymunk.Segment(static_body, (xlim[0], 98), (xlim[1], 98), 0.0)
         ]
         for line in static_lines:
             line.elasticity = 0.01
@@ -94,19 +105,21 @@ class RigidAirSimulation(object):
     def _add_golf_ball(self) -> None:
         """SON D:"""
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        body.position = 150,210
+        body.position = 300,210
         body.angular_velocity = 2*np.pi
         shape = pymunk.Circle(body,50)
         shape.elasticity = 0.95
         shape.friction = 0.25
         shape.collision_type = 2 #golf ball...
         self._space.add(body,shape)
+
     def _process_events(self) -> None:
         """
         Handle game and events like keyboard input. Call once per frame only.
         :return: None
         """
         global saving
+        global save_start_frame
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._running = False
@@ -115,15 +128,15 @@ class RigidAirSimulation(object):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 pygame.image.save(self._screen, "bouncing_balls.png")
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                saving = True #flag for saving frames 
-                pygame.time.set_timer(done_saving,10000) # set timer for event to trigger in 10000 ms
-                print("Saving next 10000ms") 
-            elif event.type == done_saving:
+                saving = True #flag for saving frames
+                save_start_frame = frame
+                print(f"Saving next {int(1/(2*self._dt)):.0f} frames") 
+            if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
                 saving = False #update flag
-                force = -1 * np.array(total_impulse) / 10000
+                force = -1 * 2 * np.array(total_impulse) / (2.34 * 1000)
                 print("Save complete")
-                print(f"Force is {force[0]:.2e} m/s? in x-direction.\nForce is {force[1]:.2e} m/s? in y-direction.")
-                pygame.time.set_timer(done_saving, 0) # is this necessary? ideally the timer should stop automatically, since set_timer was called with loops=0.
+                print(f"Force is {force[0]:.2e}N in x-direction.\nForce is {force[1]:.2e}N in y-direction.")
+        
     def _update_balls(self) -> None:
         """
         Create/remove balls as necessary. Call once per frame only.
@@ -132,12 +145,16 @@ class RigidAirSimulation(object):
         self._ticks_to_next_ball -= 1
         if self._ticks_to_next_ball <= 0:
             i = 1
-            while i < 40: #create 40 air "molecules" per tick
+            while i < 120: #create 120 air "molecules" per tick
                 self._create_ball()
                 i += 1
             self._ticks_to_next_ball = 1
         # Remove balls that move farther than bounding box horizontally
-        balls_to_remove = [ball for ball in self._balls if (ball.body.position.x > 300 or ball.body.position.x < 10)]
+        balls_to_remove = [ball for ball in self._balls if 
+                           (ball.body.position.x > xlim[1] or
+                            ball.body.position.x < 10+xlim[0] or
+                            ball.body.position.y < 98 or
+                            ball.body.position.y > 322)]
         for ball in balls_to_remove:
             self._space.remove(ball, ball.body)
             self._balls.remove(ball)
@@ -154,7 +171,7 @@ class RigidAirSimulation(object):
         x = 10
         y = random.randint(101,600-281)
         body.position = x, y
-        body.velocity = 298.76*(-(1/169.8)*(y-((319+101)/2))**2+70), 0
+        body.velocity = v_mult*(-(1/169.8)*(y-((319+101)/2))**2+70), 0
         shape = pymunk.Circle(body, radius, (0, 0))
         shape.elasticity = 1
         shape.friction = 0
@@ -193,7 +210,7 @@ class RigidAirSimulation(object):
         if saving == True:
             old_total_impulse = pymunk.vec2d.Vec2d(*total_impulse)
             total_impulse = list(arbiter.total_impulse + old_total_impulse)
-            print("It matters! It does matter!!")
+            #print("It matters! It does matter!!")
 
 
 
