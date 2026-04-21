@@ -6,6 +6,7 @@ __docformat__ = "reStructuredText"
 import random
 import time
 import sys
+import csv
 
 # Library imports
 import pygame
@@ -15,13 +16,13 @@ import pandas as pd
 # pymunk imports
 import pymunk
 import pymunk.pygame_util
-from sympy import fps
 
+#forceFrame = pd.DataFrame({"Velocity":np.arange(0,71),"Force x":np.zeros(71),"Force y":np.zeros(71)})
 xlim = (0,700)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
-v_max = 1 #WE CHANGE THIS, maybe as a parameter to run this file with.
+v_max = 70 #WE CHANGE THIS, maybe as a parameter to run this file with.
 
 #initialize some global variables.
 def vel_scaling(y,v_max):
@@ -40,7 +41,7 @@ class RigidAirSimulation(object):
         # Space
         self._space = pymunk.Space()
 
-        self._space.use_spatial_hash(2.1,200000)
+        self._space.use_spatial_hash(2.1,300000)
         # Physics
         # Time step
         self._dt = 1 / 120
@@ -89,12 +90,12 @@ class RigidAirSimulation(object):
             self._update_balls()
             self._clear_screen()
             self._draw_objects()
-            print(f"Number of balls: {len(self._balls)}")
             pygame.display.flip()
             # Delay fixed time between frames
-            self._clock.tick(60)
+            self._clock.tick(120)
             fps = self._clock.get_fps()
             frame += 1
+            #print(f"Number of balls: {len(self._balls)}, frame #: {frame}.")
             pygame.display.set_caption("fps: " + f"{fps:.2f}")
     def _add_static_scenery(self) -> None:
         """
@@ -147,12 +148,23 @@ class RigidAirSimulation(object):
                 self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_SHAPES
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
                 self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_CONSTRAINTS
-            if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
-                saving = False #update flag
-                force = -1 * 2 * np.array(total_impulse) / (2.34 * 1000)
-                curr_time = time.time() - save_time
-                print(f"Save complete in {curr_time:.2f} seconds.")
-                print(f"Force is {force[0]:.2e}N in x-direction.\nForce is {force[1]:.2e}N in y-direction.")
+        if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
+            saving = False #update flag
+            force = -1 * 2 * np.array(total_impulse) / (2.34 * 1000)
+            total_impulse[0],total_impulse[1] = 0,0
+            curr_time = time.time() - save_time
+            print(f"Save complete in {curr_time:.2f} seconds.")
+            force_data = [v_max, 
+                          force[0],
+                          force[1],
+                          int(curr_time),
+                          time.ctime()]
+            filename = 'C:/Users/Matrim/Documents/VSCode Documents/ProfCPRepoClone/ProfCPisGoatedLib/Final Project/force_output.csv'
+            with open(filename, 'a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(force_data)
+                file.close()
+            print(f"Force is {force[0]:.2e}N in x-direction.\nForce is {force[1]:.2e}N in y-direction.")
 
         
     def _update_balls(self) -> None:
@@ -163,7 +175,7 @@ class RigidAirSimulation(object):
         self._ticks_to_next_ball -= 1
         if self._ticks_to_next_ball <= 0:
             i = 1
-            while i < 50: #create 220 air "molecules" per tick
+            while i < 110: #create 219 air "molecules" per tick
                 self._create_ball()
                 i += 1
             self._ticks_to_next_ball = 1
