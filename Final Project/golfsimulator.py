@@ -153,7 +153,7 @@ class RigidAirSimulation(object):
                 self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_CONSTRAINTS
         if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
             saving = False #update flag
-            force = -1 * 2 * np.array(total_impulse) / (2.34 * 1000)
+            force = -1 * 2.34 * np.array(total_impulse) / (2 * 1000)
             total_impulse[0],total_impulse[1] = 0,0
             curr_time = time.time() - save_time
             print(f"Save complete in {curr_time:.2f} seconds.")
