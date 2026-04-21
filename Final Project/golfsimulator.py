@@ -22,7 +22,7 @@ xlim = (0,700)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
-v_max = 70 #WE CHANGE THIS, maybe as a parameter to run this file with.
+v_max = 68 #WE CHANGE THIS, maybe as a parameter to run this file with.
 
 #initialize some global variables.
 def vel_scaling(y,v_max):
