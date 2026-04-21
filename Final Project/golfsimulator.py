@@ -21,7 +21,7 @@ xlim = (0,700)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
-v_max = 30 #WE CHANGE THIS, maybe as a parameter to run this file with.
+v_max = 1 #WE CHANGE THIS, maybe as a parameter to run this file with.
 
 #initialize some global variables.
 def vel_scaling(y,v_max):
@@ -47,7 +47,9 @@ class RigidAirSimulation(object):
         # Number of physics steps per screen frame
         self._physics_steps_per_frame = 4
         global v_mult
-        v_mult = 1/(self._physics_steps_per_frame/(self._dt) * (1/1000) * (1/2.34))
+        v_mult = 1/(self._physics_steps_per_frame/(self._dt) * (1/1000) * (2.34))
+        # parentheses should be subframes/frame * frames / second * m / mm * mm / unit = (subframes * m )/(second * unit)
+        # then, reciprocal is (second * unit) / (subframes * m), which multiplied by m / s gives, unit / subframe
 
         #Important collision handling
         self._space.on_collision(1,2,begin=self._ball_show,post_solve=self._ball_math)
@@ -161,7 +163,7 @@ class RigidAirSimulation(object):
         self._ticks_to_next_ball -= 1
         if self._ticks_to_next_ball <= 0:
             i = 1
-            while i < 220: #create 120 air "molecules" per tick
+            while i < 50: #create 220 air "molecules" per tick
                 self._create_ball()
                 i += 1
             self._ticks_to_next_ball = 1
