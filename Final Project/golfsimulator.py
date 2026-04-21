@@ -44,7 +44,7 @@ class RigidAirSimulation(object):
         # Space
         self._space = pymunk.Space()
 
-        self._space.use_spatial_hash(2.1,300000)
+        self._space.use_spatial_hash(2.1,200000)
         # Physics
         # Time step
         self._dt = 1 / 120
