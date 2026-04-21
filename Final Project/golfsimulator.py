@@ -7,6 +7,7 @@ import random
 import time
 import sys
 import csv
+import argparse
 
 # Library imports
 import pygame
@@ -22,7 +23,9 @@ xlim = (0,700)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
-v_max = 68 #WE CHANGE THIS, maybe as a parameter to run this file with.
+
+v_max = 70 # default, changed with args
+count_per_tick = 110 # default, changed with args
 
 #initialize some global variables.
 def vel_scaling(y,v_max):
@@ -157,6 +160,7 @@ class RigidAirSimulation(object):
             force_data = [v_max, 
                           force[0],
                           force[1],
+                          count_per_tick,
                           int(curr_time),
                           time.ctime()]
             filename = 'C:/Users/Matrim/Documents/VSCode Documents/ProfCPRepoClone/ProfCPisGoatedLib/Final Project/force_output.csv'
@@ -174,8 +178,8 @@ class RigidAirSimulation(object):
         """
         self._ticks_to_next_ball -= 1
         if self._ticks_to_next_ball <= 0:
-            i = 1
-            while i < 110: #create 219 air "molecules" per tick
+            i = 0
+            while i < count_per_tick: #create 219 air "molecules" per tick
                 self._create_ball()
                 i += 1
             self._ticks_to_next_ball = 1
@@ -251,7 +255,18 @@ def main():
 start_sim_time = time.perf_counter()
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Script that runs a simulation of airflow on a ball."
+    )
+    parser.add_argument("--num1", required=True, type=int, help=
+                        "Velocity maximum of air in simulation.")
+    parser.add_argument("--num2", required=True, type=int,help=
+                        "Number of air \"molecules\" spawned per frame. Use lower count for lower max velocity, max at 110.")
+    args = parser.parse_args()
+    v_max = args.num1
+    count_per_tick = args.num2
     main()
+print(f"Exiting at " + str(time.ctime) + ".")
 pygame.display.quit()
 pygame.quit()
 sys.exit()
