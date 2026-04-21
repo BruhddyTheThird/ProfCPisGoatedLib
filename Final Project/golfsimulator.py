@@ -25,7 +25,7 @@ saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
 
 v_max = 70 # default, changed with args
-count_per_tick = 110 # default, changed with args
+count_per_tick = 40 # default, changed with args
 
 #initialize some global variables.
 def vel_scaling(y,v_max):
@@ -153,7 +153,7 @@ class RigidAirSimulation(object):
                 self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_CONSTRAINTS
         if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
             saving = False #update flag
-            force = -1 * 2.34 * np.array(total_impulse) / (2 * 1000)
+            force = -1 * 1000 * self._physics_steps_per_frame * np.array(total_impulse) / (2*2.34)
             total_impulse[0],total_impulse[1] = 0,0
             curr_time = time.time() - save_time
             print(f"Save complete in {curr_time:.2f} seconds.")
@@ -261,12 +261,12 @@ if __name__ == "__main__":
     parser.add_argument("--num1", required=True, type=int, help=
                         "Velocity maximum of air in simulation.")
     parser.add_argument("--num2", required=True, type=int,help=
-                        "Number of air \"molecules\" spawned per frame. Use lower count for lower max velocity, max at 110.")
+                        "Number of air \"molecules\" spawned per frame. Use lower count for lower max velocity, max at 40.")
     args = parser.parse_args()
     v_max = args.num1
     count_per_tick = args.num2
     main()
-print(f"Exiting at " + str(time.ctime) + ".")
+print(f"Exiting at {time.ctime()}.")
 pygame.display.quit()
 pygame.quit()
 sys.exit()
