@@ -168,7 +168,7 @@ class RigidAirSimulation(object):
             pygame.image.save(self._screen, f"golfsimulator_images/simcap_frame_{frame}_date_{time.time()}.png")
         if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
             saving = False #update flag
-            force_mag = -1 * 1000 * self._physics_steps_per_frame * np.array(total_impulse) / (2*2.34)
+            force_mag = 1000 * self._physics_steps_per_frame * np.array(total_impulse) / (2*2.34)
             force = [-force_mag[0],force_mag[1]] # in game co-ordinate system, x+ is rightward, z+ is downward, this gives our perspective
             total_impulse[0],total_impulse[1] = 0,0
             curr_time = time.time() - save_time
