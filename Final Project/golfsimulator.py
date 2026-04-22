@@ -8,6 +8,7 @@ import time
 import sys
 import csv
 import argparse
+from PIL import Image
 
 # Library imports
 import pygame
@@ -17,6 +18,7 @@ import pandas as pd
 # pymunk imports
 import pymunk
 import pymunk.pygame_util
+import pymunk.autogeometry
 
 #forceFrame = pd.DataFrame({"Velocity":np.arange(0,71),"Force x":np.zeros(71),"Force y":np.zeros(71)})
 xlim = (0,700)
@@ -32,6 +34,19 @@ def vel_scaling(y,v_max):
     f = v_max / ( (100 - 210)**2 )
     return -f * (y-210)**2 + v_max #gives a scaling velocity curve to the spawned air.
 
+
+img = Image.open('GolfBallSmall.png')
+img_bw = img.convert('L')
+img.close()
+img_array = np.array(img_bw)
+#Get our golf ball!
+def sampler(point) -> float:
+    x = int(point[0])
+    y = int(point[1])
+    return 1 - img_array[x,y] / 255
+
+pl_set = pymunk.autogeometry.march_soft(
+    pymunk.BB(0,0,100,100),1000,1000,threshold=1/255,sample_func=sampler)
 
 class RigidAirSimulation(object):
     """
@@ -69,7 +84,9 @@ class RigidAirSimulation(object):
         # Static barrier walls (lines) that the balls bounce off of
         self._add_static_scenery()
         # Static/rotating golf ball that the balls hit.
-        self._add_golf_ball()
+        #self._add_golf_ball()
+        self._add_good_golf_ball()
+
         # Balls that exist in the world
         self._balls: list[pymunk.Circle] = []
         # Execution control and time until the next ball spawns
@@ -116,17 +133,6 @@ class RigidAirSimulation(object):
             box.friction = 0.01
         self._space.add(*static_boxes)
     
-    def _add_golf_ball(self) -> None:
-        """SON D:"""
-        body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        body.position = 300,210
-        body.angular_velocity = 2#41*np.pi #about 240pi rad/s just showing the rotation
-        shape = pymunk.Circle(body,50)
-        shape.elasticity = 1
-        shape.friction = 0.25
-        shape.collision_type = 2 #golf ball...
-        self._space.add(body,shape)
-
     def _process_events(self) -> None:
         """
         Handle game and events like keyboard input. Call once per frame only.
@@ -245,6 +251,42 @@ class RigidAirSimulation(object):
             old_total_impulse = pymunk.vec2d.Vec2d(*total_impulse)
             total_impulse = list(arbiter.total_impulse + old_total_impulse)
             #print("It matters! It does matter!!")
+    def _add_good_golf_ball(self):
+        body1 = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
+        body1.position = 300,210
+        body1.angular_velocity = 7 #about 240pi rad/s just showing the rotation
+        self._space.add(body1)
+        for polyline in pl_set:
+            simple = pymunk.autogeometry.simplify_curves(polyline,0.5)
+
+            for i in range(len(simple)-1):
+                #print(str(list(simple[i])) + str(list(simple[i+1])))
+                point1 = pymunk.vec2d.Vec2d(
+                        simple[i][0] - 50,
+                        simple[i][1] - 50
+                )
+                point2 = pymunk.vec2d.Vec2d(
+                        simple[i+1][0] - 50,
+                        simple[i+1][1] - 50
+                    )
+                #point1 = simple[i]
+                #point2 = simple[i+1]
+                shape = pymunk.Segment(body = body1,a = point1, b = point2,radius=1) #change radius? run it!
+                shape.elasticity = 1
+                shape.friction = 0.25
+                shape.collision_type = 2
+                #print(f"We are line number {i}!")
+                self._space.add(shape)
+    def _add_golf_ball(self) -> None:
+        """SON D:"""
+        body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
+        body.position = 300,210
+        body.angular_velocity = 2#41*np.pi #about 240pi rad/s just showing the rotation
+        shape = pymunk.Circle(body,50)
+        shape.elasticity = 1
+        shape.friction = 0.25
+        shape.collision_type = 2 #golf ball...
+        self._space.add(body,shape)
 
 
 
