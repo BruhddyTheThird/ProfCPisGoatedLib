@@ -26,7 +26,7 @@ ylim = (100,500)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
-golf_ball_omega = 0 #rad / s
+golf_ball_omega = 1 #rad / s
 save_img_bool = False
 
 v_max = 70 # default, changed with args
@@ -313,9 +313,9 @@ if __name__ == "__main__":
     parser.add_argument("--num1", required=True, type=int, help=
                         "Velocity maximum of air in simulation.")
     parser.add_argument("--num2", required=True, type=int,help=
-                        "Number of air \"molecules\" spawned per frame. Use lower count for lower max velocity, max at 40.")
-    parser.add_argument("--num3", required=False, type=float, default=3.0, help=
-                        "Radial velocity of the golf ball in rad/s. Change to mess with parameters, don't change for testing suite.")
+                        "Number of air \"molecules\" spawned per frame. Use lower count for lower max velocity, max at 90.")
+    parser.add_argument("--num3", required=False, type=float, default=1.0, help=
+                        "Radial velocity of the golf ball in rad/s. Change to mess with parameters, don't change for testing suite. Defaults to 1 rad/s")
     parser.add_argument("--save", required=False, type=str, default="N", help=
                         "Input \'Y\'/\'N\' - Whether to save a series of images to disk upon hitting the 's' key. Defaults to \'N\'. Case sensitive.")
     args = parser.parse_args()
