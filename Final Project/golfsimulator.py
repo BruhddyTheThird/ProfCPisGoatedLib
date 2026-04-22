@@ -22,17 +22,20 @@ import pymunk.autogeometry
 
 #forceFrame = pd.DataFrame({"Velocity":np.arange(0,71),"Force x":np.zeros(71),"Force y":np.zeros(71)})
 xlim = (0,700)
+ylim = (100,500)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
 total_impulse = [0,0]
+golf_ball_omega = 0 #rad / s
+save_img_bool = False
 
 v_max = 70 # default, changed with args
 count_per_tick = 40 # default, changed with args
 
 #initialize some global variables.
 def vel_scaling(y,v_max):
-    f = v_max / ( (100 - 210)**2 )
-    return -f * (y-210)**2 + v_max #gives a scaling velocity curve to the spawned air.
+    f = v_max / ( (ylim[0] - np.average(ylim))**2 )
+    return -f * (y-np.average(ylim))**2 + v_max #gives a scaling velocity curve to the spawned air.
 
 
 img = Image.open('GolfBallSmall.png')
@@ -59,7 +62,7 @@ class RigidAirSimulation(object):
         # Space
         self._space = pymunk.Space()
 
-        self._space.use_spatial_hash(2.1,200000)
+        self._space.use_spatial_hash(2.1,300000)
         # Physics
         # Time step
         self._dt = 1 / 120
@@ -75,7 +78,7 @@ class RigidAirSimulation(object):
 
         # pygame
         pygame.init()
-        self._screen = pygame.display.set_mode((xlim[1], 400))
+        self._screen = pygame.display.set_mode((xlim[1], ylim[1]+10))
         self._clock = pygame.time.Clock()
 
         self._draw_options = pymunk.pygame_util.DrawOptions(self._screen)
@@ -124,8 +127,14 @@ class RigidAirSimulation(object):
         """
         static_body = self._space.static_body
         static_boxes = [
-            pymunk.Poly(self._space.static_body, [(xlim[0],320),(xlim[1],320),(xlim[1],322),(xlim[0],322)]),
-            pymunk.Poly(self._space.static_body, [(xlim[0],100),(xlim[1],100),(xlim[1],98),(xlim[0],98)])
+            pymunk.Poly(self._space.static_body, [(xlim[0],ylim[1]),
+                                                  (xlim[1],ylim[1]),
+                                                  (xlim[1],ylim[1]+2),
+                                                  (xlim[0],ylim[1]+2)]),
+            pymunk.Poly(self._space.static_body, [(xlim[0],ylim[0]),
+                                                  (xlim[1],ylim[0]),
+                                                  (xlim[1],ylim[0]-2),
+                                                  (xlim[0],ylim[0]-2)])
         ]
         
         for box in static_boxes:
@@ -146,8 +155,6 @@ class RigidAirSimulation(object):
                 self._running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self._running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                pygame.image.save(self._screen, "bouncing_balls.png")
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                 saving = True #flag for saving frames
                 save_start_frame = frame
@@ -157,6 +164,8 @@ class RigidAirSimulation(object):
                 self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_SHAPES
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
                 self._draw_options.flags = pymunk.pygame_util.DrawOptions.DRAW_CONSTRAINTS
+        if saving == True and save_img_bool == True:
+            pygame.image.save(self._screen, f"golfsimulator_images/simcap_frame_{frame}_date_{time.time()}.png")
         if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
             saving = False #update flag
             force = -1 * 1000 * self._physics_steps_per_frame * np.array(total_impulse) / (2*2.34)
@@ -168,7 +177,8 @@ class RigidAirSimulation(object):
                           force[1],
                           count_per_tick,
                           int(curr_time),
-                          time.ctime()]
+                          time.ctime(),
+                          golf_ball_omega]
             filename = 'C:/Users/Matrim/Documents/VSCode Documents/ProfCPRepoClone/ProfCPisGoatedLib/Final Project/force_output.csv'
             with open(filename, 'a', newline='') as file:
                 writer = csv.writer(file)
@@ -193,8 +203,8 @@ class RigidAirSimulation(object):
         balls_to_remove = [ball for ball in self._balls if 
                            (ball.body.position.x > xlim[1] or
                             ball.body.position.x < 10+xlim[0] or
-                            ball.body.position.y < 98 or
-                            ball.body.position.y > 322)]
+                            ball.body.position.y < ylim[0]-2 or
+                            ball.body.position.y > ylim[1]+2)]
         for ball in balls_to_remove:
             self._space.remove(ball, ball.body)
             self._balls.remove(ball)
@@ -209,7 +219,7 @@ class RigidAirSimulation(object):
         inertia = pymunk.moment_for_circle(mass, 0, radius, (0, 0))
         body = pymunk.Body(mass, inertia) #testing 0 moment
         x = 10
-        y = random.randint(101,600-281)
+        y = random.randint(ylim[0]+1,ylim[1]-1)
         body.position = x, y
         body.velocity = v_mult*vel_scaling(y,v_max), 0
         shape = pymunk.Circle(body, radius, (0, 0))
@@ -253,8 +263,8 @@ class RigidAirSimulation(object):
             #print("It matters! It does matter!!")
     def _add_good_golf_ball(self):
         body1 = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        body1.position = 300,210
-        body1.angular_velocity = 7 #about 240pi rad/s just showing the rotation
+        body1.position = 220,np.average(ylim)
+        body1.angular_velocity = golf_ball_omega
         self._space.add(body1)
         for polyline in pl_set:
             simple = pymunk.autogeometry.simplify_curves(polyline,0.5)
@@ -280,7 +290,7 @@ class RigidAirSimulation(object):
     def _add_golf_ball(self) -> None:
         """SON D:"""
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        body.position = 300,210
+        body.position = 220,np.average(ylim)
         body.angular_velocity = 2#41*np.pi #about 240pi rad/s just showing the rotation
         shape = pymunk.Circle(body,50)
         shape.elasticity = 1
@@ -304,9 +314,17 @@ if __name__ == "__main__":
                         "Velocity maximum of air in simulation.")
     parser.add_argument("--num2", required=True, type=int,help=
                         "Number of air \"molecules\" spawned per frame. Use lower count for lower max velocity, max at 40.")
+    parser.add_argument("--num3", required=False, type=float, default=3.0, help=
+                        "Radial velocity of the golf ball in rad/s. Change to mess with parameters, don't change for testing suite.")
+    parser.add_argument("--save", required=False, type=str, default="N", help=
+                        "Input \'Y\'/\'N\' - Whether to save a series of images to disk upon hitting the 's' key. Defaults to \'N\'. Case sensitive.")
     args = parser.parse_args()
     v_max = args.num1
     count_per_tick = args.num2
+    golf_ball_omega = args.num3
+    save = args.save
+    if save == "Y":
+        save_img_bool = True
     main()
 print(f"Exiting at {time.ctime()}.")
 pygame.display.quit()
