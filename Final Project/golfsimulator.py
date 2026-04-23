@@ -156,6 +156,7 @@ class RigidAirSimulation(object):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self._running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+                total_impulse[0],total_impulse[1] = 0,0
                 saving = True #flag for saving frames
                 save_start_frame = frame
                 save_time = time.time()
