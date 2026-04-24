@@ -148,8 +148,8 @@ class RigidAirSimulation(object):
         :return: None
         """
         global saving
-        global save_start_frame
-        global save_time
+        save_start_frame = 0
+        save_time = None
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._running = False
@@ -157,6 +157,8 @@ class RigidAirSimulation(object):
                 self._running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                 total_impulse[0],total_impulse[1] = 0,0
+                if saving:
+                    print("Save interrupted! Restarting save.")
                 saving = True #flag for saving frames
                 save_start_frame = frame
                 save_time = time.time()
@@ -170,7 +172,7 @@ class RigidAirSimulation(object):
         if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
             saving = False #update flag
             force_mag = 1000 * self._physics_steps_per_frame * np.array(total_impulse) / (2*2.34)
-            force = [-force_mag[0],force_mag[1]] # in game co-ordinate system, x+ is rightward, z+ is downward, this gives our perspective
+            force = [-force_mag[0],-force_mag[1]] # negates impulse on the air particles to give the impulse on the ball.
             total_impulse[0],total_impulse[1] = 0,0
             curr_time = time.time() - save_time
             print(f"Save complete in {curr_time:.2f} seconds.")
