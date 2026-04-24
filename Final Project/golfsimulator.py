@@ -119,7 +119,7 @@ class RigidAirSimulation(object):
             fps = self._clock.get_fps()
             frame += 1
             #print(f"Number of balls: {len(self._balls)}, frame #: {frame}.")
-            pygame.display.set_caption("fps: " + f"{fps:.2f}")
+            pygame.display.set_caption("fps: " + f"{fps:.2f}, " + f"{100*fps/120:.1f}\% of real-time.")
     def _add_static_scenery(self) -> None:
         """
         Create the static bodies.
