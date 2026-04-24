@@ -20,7 +20,7 @@ import pymunk
 import pymunk.pygame_util
 import pymunk.autogeometry
 
-#forceFrame = pd.DataFrame({"Velocity":np.arange(0,71),"Force x":np.zeros(71),"Force y":np.zeros(71)})
+
 xlim = (0,700)
 ylim = (100,500)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
@@ -69,9 +69,9 @@ class RigidAirSimulation(object):
         # Number of physics steps per screen frame
         self._physics_steps_per_frame = 4
         global v_mult
-        v_mult = 1/(self._physics_steps_per_frame/(self._dt) * (1/1000) * (2.34))
-        # parentheses should be subframes/frame * frames / second * m / mm * mm / unit = (subframes * m )/(second * unit)
-        # then, reciprocal is (second * unit) / (subframes * m), which multiplied by m / s gives, unit / subframe
+        v_mult = 1/(1/(self._dt) * (1/1000) * (2.34))
+        # parentheses should be frames / second * m / mm * mm / unit = (frames * m )/(second * unit)
+        # then, reciprocal is (second * unit) / (frames * m), which multiplied by m / s gives, unit / frame
 
         #Important collision handling
         self._space.on_collision(1,2,begin=self._ball_show,post_solve=self._ball_math)
@@ -171,7 +171,7 @@ class RigidAirSimulation(object):
             pygame.image.save(self._screen, f"golfsimulator_images/simcap_frame_{frame}_date_{time.time()}.png")
         if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
             saving = False #update flag
-            force_mag = 1000 * self._physics_steps_per_frame * np.array(total_impulse) / (2*2.34)
+            force_mag = 1000 * np.array(total_impulse) / (2*2.34)
             force = [-force_mag[0],-force_mag[1]] # negates impulse on the air particles to give the impulse on the ball.
             total_impulse[0],total_impulse[1] = 0,0
             curr_time = time.time() - save_time
