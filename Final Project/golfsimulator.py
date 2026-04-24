@@ -115,7 +115,7 @@ class RigidAirSimulation(object):
             self._draw_objects()
             pygame.display.flip()
             # Delay fixed time between frames
-            self._clock.tick(120)
+            self._clock.tick(240)
             fps = self._clock.get_fps()
             frame += 1
             #print(f"Number of balls: {len(self._balls)}, frame #: {frame}.")
