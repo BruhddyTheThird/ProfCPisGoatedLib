@@ -271,7 +271,7 @@ class RigidAirSimulation(object):
         body1.angular_velocity = golf_ball_omega
         self._space.add(body1)
         for polyline in pl_set:
-            simple = pymunk.autogeometry.simplify_curves(polyline,0.5)
+            simple = pymunk.autogeometry.simplify_curves(polyline,0.2)
 
             for i in range(len(simple)-1):
                 #print(str(list(simple[i])) + str(list(simple[i+1])))
@@ -285,7 +285,7 @@ class RigidAirSimulation(object):
                     )
                 #point1 = simple[i]
                 #point2 = simple[i+1]
-                shape = pymunk.Segment(body = body1,a = point1, b = point2,radius=1) #change radius? run it!
+                shape = pymunk.Segment(body = body1,a = point1, b = point2,radius=1.5) #change radius? run it!
                 shape.elasticity = 1
                 shape.friction = 0.25
                 shape.collision_type = 2
