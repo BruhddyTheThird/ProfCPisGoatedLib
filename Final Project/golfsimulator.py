@@ -115,7 +115,7 @@ class RigidAirSimulation(object):
             self._draw_objects()
             pygame.display.flip()
             # Delay fixed time between frames
-            self._clock.tick(120)
+            self._clock.tick(240)
             fps = self._clock.get_fps()
             frame += 1
             #print(f"Number of balls: {len(self._balls)}, frame #: {frame}.")
@@ -183,7 +183,7 @@ class RigidAirSimulation(object):
                           int(curr_time),
                           time.ctime(),
                           golf_ball_omega]
-            filename = 'C:/Users/Matrim/Documents/VSCode Documents/ProfCPRepoClone/ProfCPisGoatedLib/Final Project/force_output.csv'
+            filename = 'force_output.csv'
             with open(filename, 'a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow(force_data)
@@ -258,7 +258,7 @@ class RigidAirSimulation(object):
     def _ball_math(self,arbiter,space,data) -> None:
         """
         Access impulse on ball due to collision (post_solve).
-        Add impulse (equals $\Delta p$) to total momentum change, 
+        Add impulse (equals $\\Delta p$) to total momentum change, 
         """
         global total_impulse
         if saving == True:
