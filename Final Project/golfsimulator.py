@@ -148,8 +148,8 @@ class RigidAirSimulation(object):
         :return: None
         """
         global saving
-        save_start_frame = 0
-        save_time = None
+        global save_start_frame
+        global save_time
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._running = False
