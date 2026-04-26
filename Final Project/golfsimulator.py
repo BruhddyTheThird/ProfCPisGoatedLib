@@ -21,7 +21,7 @@ import pymunk.pygame_util
 import pymunk.autogeometry
 
 
-xlim = (0,700)
+xlim = (0,1080)
 ylim = (100,500)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
@@ -267,7 +267,7 @@ class RigidAirSimulation(object):
             #print("It matters! It does matter!!")
     def _add_good_golf_ball(self):
         body1 = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        body1.position = 220,np.average(ylim)
+        body1.position = 400,np.average(ylim)
         body1.angular_velocity = golf_ball_omega
         self._space.add(body1)
         for polyline in pl_set:
