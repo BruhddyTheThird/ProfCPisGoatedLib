@@ -20,8 +20,8 @@ import pymunk
 import pymunk.pygame_util
 import pymunk.autogeometry
 
-#forceFrame = pd.DataFrame({"Velocity":np.arange(0,71),"Force x":np.zeros(71),"Force y":np.zeros(71)})
-xlim = (0,700)
+
+xlim = (0,1080)
 ylim = (100,500)
 done_saving = pygame.USEREVENT + 1 # Make a new user event
 saving = False #initialize global saving for ball_math
@@ -69,9 +69,9 @@ class RigidAirSimulation(object):
         # Number of physics steps per screen frame
         self._physics_steps_per_frame = 4
         global v_mult
-        v_mult = 1/(self._physics_steps_per_frame/(self._dt) * (1/1000) * (2.34))
-        # parentheses should be subframes/frame * frames / second * m / mm * mm / unit = (subframes * m )/(second * unit)
-        # then, reciprocal is (second * unit) / (subframes * m), which multiplied by m / s gives, unit / subframe
+        v_mult = 1/(1/(self._dt) * (1/1000) * (2.34))
+        # parentheses should be frames / second * m / mm * mm / unit = (frames * m )/(second * unit)
+        # then, reciprocal is (second * unit) / (frames * m), which multiplied by m / s gives, unit / frame
 
         #Important collision handling
         self._space.on_collision(1,2,begin=self._ball_show,post_solve=self._ball_math)
@@ -115,11 +115,11 @@ class RigidAirSimulation(object):
             self._draw_objects()
             pygame.display.flip()
             # Delay fixed time between frames
-            self._clock.tick(120)
+            self._clock.tick(240)
             fps = self._clock.get_fps()
             frame += 1
             #print(f"Number of balls: {len(self._balls)}, frame #: {frame}.")
-            pygame.display.set_caption("fps: " + f"{fps:.2f}")
+            pygame.display.set_caption("fps: " + f"{fps:.2f}, " + f"{100*fps/120:.1f}% of real-time.")
     def _add_static_scenery(self) -> None:
         """
         Create the static bodies.
@@ -171,7 +171,7 @@ class RigidAirSimulation(object):
             pygame.image.save(self._screen, f"golfsimulator_images/simcap_frame_{frame}_date_{time.time()}.png")
         if saving == True and frame >= int(1/(2*self._dt))+save_start_frame:
             saving = False #update flag
-            force_mag = 1000 * self._physics_steps_per_frame * np.array(total_impulse) / (2*2.34)
+            force_mag = 1000 * np.array(total_impulse) / (2*2.34)
             force = [-force_mag[0],-force_mag[1]] # negates impulse on the air particles to give the impulse on the ball.
             total_impulse[0],total_impulse[1] = 0,0
             curr_time = time.time() - save_time
@@ -258,7 +258,7 @@ class RigidAirSimulation(object):
     def _ball_math(self,arbiter,space,data) -> None:
         """
         Access impulse on ball due to collision (post_solve).
-        Add impulse (equals $\Delta p$) to total momentum change, 
+        Add impulse (equals $\\Delta p$) to total momentum change, 
         """
         global total_impulse
         if saving == True:
@@ -267,11 +267,11 @@ class RigidAirSimulation(object):
             #print("It matters! It does matter!!")
     def _add_good_golf_ball(self):
         body1 = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        body1.position = 220,np.average(ylim)
+        body1.position = 400,np.average(ylim)
         body1.angular_velocity = golf_ball_omega
         self._space.add(body1)
         for polyline in pl_set:
-            simple = pymunk.autogeometry.simplify_curves(polyline,0.5)
+            simple = pymunk.autogeometry.simplify_curves(polyline,0.2)
 
             for i in range(len(simple)-1):
                 #print(str(list(simple[i])) + str(list(simple[i+1])))
@@ -285,7 +285,7 @@ class RigidAirSimulation(object):
                     )
                 #point1 = simple[i]
                 #point2 = simple[i+1]
-                shape = pymunk.Segment(body = body1,a = point1, b = point2,radius=1) #change radius? run it!
+                shape = pymunk.Segment(body = body1,a = point1, b = point2,radius=1.5) #change radius? run it!
                 shape.elasticity = 1
                 shape.friction = 0.25
                 shape.collision_type = 2
