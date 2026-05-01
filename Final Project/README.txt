@@ -57,3 +57,4 @@ Generally, dont press this until the simulation looks how you would expect the a
 
 One can press "Esc" or click the x in the corner of the window to close the simulation.
 
+Generally, at long-range expect between 2 and 4 FPS and 1-8% RTP on a normal computer. 
