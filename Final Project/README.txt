@@ -6,6 +6,14 @@ Abhishek Vilekar
 Andrew Gabaldon
 
 Before running the file, make sure you have either a python shell you can access (like conda) or python added to your PATH.
+You might also need to pip install the following libraries to whatever installation of python you are running this in:
+
+pymunk
+pygame-ce
+pillow
+numpy
+pandas
+
 The file is run via the command line, with arguments.
 (obviously, you must `cd` to the directory the `golfsimulator.py` lies in)
 The command to run the file in powershell or cmd is as such:
