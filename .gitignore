@@ -1,6 +1,7 @@
 __pycache__/
 *.xcf
 .vscode/
+.venv/
 # Created by https://www.toptal.com/developers/gitignore/api/jupyternotebooks,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=jupyternotebooks,windows
 
