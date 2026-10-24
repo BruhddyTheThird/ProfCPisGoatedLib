@@ -9,42 +9,10 @@ input_maps = {'i':sp.I}
 global_var_dict={'x':sp.Symbol('x'),'y':sp.Symbol('y'),'z':sp.Symbol('z')}
 global_var_dict.update(sp.__dict__)
 
-def MakeKet(badKetPsi) -> spq.Ket:
-    try:
-        psiStr = list(badKetPsi)
-        ordPsiStr = [[]]
-        j = 0
-        for z,i in enumerate(psiStr):
-            if i=="|":
-                j+=1
-                ordPsiStr.append([])
-            ordPsiStr[j].append(i)
-            if i == ">":
-                j+= 1
-                if z != len(psiStr)-1:
-                    ordPsiStr.append([])
-        state = 0 * spq.Ket(sp.Symbol("null"))
-        for i in range(len(ordPsiStr)):
-            if i % 2 == 1:
-                eigStateList = ordPsiStr[i]
-                coeff = sp.parse_expr(("".join(ordPsiStr[i-1])).replace(" ",""),
-                                      global_dict=global_var_dict,
-                                      local_dict=input_maps,
-                                      transformations='all')
-                if coeff == 0:
-                    coeff = 1
-                eigStateList.remove("|")
-                eigStateList.remove(">")
-                eigStateStr = "".join(eigStateList)
-                eigStateSym = sp.Symbol(eigStateStr)
-                eigState = spq.Ket(eigStateSym)
-                state = coeff*eigState + state
-        return state
-    except ValueError:
-        pass
+from BraKetLib import *
 
 def TryDual(*args):
-    ketPsi_1 = MakeKet(ketPsi.get())
+    ketPsi_1 = MakeKet(ketPsi.get(),global_var_dict,input_maps)
     if ketPsi_1 == 0:
         braPsi.set("0")
     else:
